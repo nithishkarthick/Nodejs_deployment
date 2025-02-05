@@ -5,7 +5,7 @@ const bcrypt = require('bcryptjs');
 
 
 const app = express();
-const port = 3001;
+const port = 3000;
 
 // Middleware to parse JSON and URL encoded data
 app.use(bodyParser.urlencoded({ extended: false }));
