@@ -1,0 +1,38 @@
+name: Node.js CI/CD
+
+on:
+  push:
+    branches:
+      - main  # Trigger deployment when pushing to the main branch
+  pull_request:
+    branches:
+      - main  # Trigger deployment when creating a pull request to the main branch    
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Set up Node.js
+      uses: actions/setup-node@v2
+      with:
+        node-version: '14'  # Set the Node.js version here (use the version your app is using)
+
+    - name: Install dependencies
+      run: npm install
+
+    - name: Run tests
+      run: npm test  # If you have tests set up, otherwise, remove this step
+
+    - name: Build the app
+      run: npm run build  # If you have a build script, otherwise remove this step
+
+    - name: Deploy to server
+      run: |
+        ssh -i ${{ secrets.SSH_PRIVATE_KEY }} user@your-server-ip "cd /path/to/app && git pull && npm install && pm2 restart app"  # Command to deploy to your server (using pm2 for process management)
+      env:
+        SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+
