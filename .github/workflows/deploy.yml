@@ -32,7 +32,7 @@ jobs:
 
     - name: Deploy to server
       run: |
-        ssh -i ~/.ssh/nickey.pem ubuntu@3.110.194.68 "cd /path/to/app && git pull && npm install && pm2 restart app"
+        ssh -i ~/.ssh/id_rsa ubuntu@43.204.233.203 "cd /path/to/app && git pull && npm install && pm2 restart app"
 
   # Command to deploy to your server (using pm2 for process management)
       env:
