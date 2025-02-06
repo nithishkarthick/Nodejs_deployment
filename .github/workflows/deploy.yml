@@ -1,4 +1,4 @@
-name: Node.js CI/CD
+name: Node.js CI/CD with Docker
 
 on:
   push:
@@ -30,11 +30,28 @@ jobs:
     - name: Build the app
       run: npm run build  # If you have a build script, otherwise remove this step
 
-    - name: Deploy to server
-      run: |
-        ssh -i C:\Users\AgnoShin\.ssh\id_rsa ubuntu@43.204.233.203 "cd /path/to/app && git pull && npm install && pm2 restart app"
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v2
 
-  # Command to deploy to your server (using pm2 for process management)
-      env:
-        SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+    - name: Cache Docker layers
+      uses: actions/cache@v2
+      with:
+        path: /tmp/.buildx-cache
+        key: ${{ runner.os }}-buildx-${{ github.sha }}
+        restore-keys: |
+          ${{ runner.os }}-buildx-
+
+    - name: Log in to Docker Hub
+      uses: docker/login-action@v2
+      with:
+        username: ${{ secrets.DOCKER_USERNAME }}
+        password: ${{ secrets.DOCKER_PASSWORD }}
+
+    - name: Build Docker image
+      run: |
+        docker build -t your-docker-username/your-image-name:latest .
+
+    - name: Push Docker image to Docker Hub
+      run: |
+        docker push your-docker-username/your-image-name:latest
 
