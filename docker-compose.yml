@@ -1,0 +1,49 @@
+version: '3.8'
+
+services:
+  user-service:
+    build: ./user-service
+    ports:
+      - "4000:4000"
+    depends_on:
+      - mysql
+    env_file:
+      - ./user-service/.env
+
+  donor-service:
+    build: ./donor-service
+    ports:
+      - "5000:5000"
+    depends_on:
+      - mysql
+    env_file:
+      - ./donor-service/.env
+
+
+  notification-service:
+    build: ./notification-service
+    ports:
+      - "6000:6000"
+
+  api-gateway:
+    build: ./api-gateway
+    ports:
+      - "8000:8000"
+    depends_on:
+      - user-service
+      - donor-service
+      - notification-service
+
+  mysql:
+    build: ./database
+    restart: always
+    ports:
+      - "3306:3306"
+    environment:
+      - MYSQL_ROOT_PASSWORD=root
+      - MYSQL_DATABASE=blood_donation_app
+    volumes:
+      - mysql_data:/var/lib/mysql
+
+volumes:
+  mysql_data:
