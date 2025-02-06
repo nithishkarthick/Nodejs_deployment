@@ -1,5 +1,9 @@
 version: '3.8'
 
+networks:
+  blood-donation-network:
+    driver: bridge
+
 services:
   user-service:
     build: ./user-service
@@ -9,6 +13,8 @@ services:
       - mysql
     env_file:
       - ./user-service/.env
+    networks:
+      - blood-donation-network  
 
   donor-service:
     build: ./donor-service
@@ -18,12 +24,19 @@ services:
       - mysql
     env_file:
       - ./donor-service/.env
-
+    networks:
+      - blood-donation-network  
 
   notification-service:
     build: ./notification-service
     ports:
       - "6000:6000"
+    depends_on:
+      - mysql
+    env_file:
+      - ./notification-service/.env
+    networks:
+      - blood-donation-network
 
   api-gateway:
     build: ./api-gateway
@@ -33,17 +46,23 @@ services:
       - user-service
       - donor-service
       - notification-service
+    networks:
+      - blood-donation-network
 
   mysql:
-    build: ./database
+    image: mysql:latest
     restart: always
     ports:
       - "3306:3306"
     environment:
       - MYSQL_ROOT_PASSWORD=root
-      - MYSQL_DATABASE=blood_donation_app
+      - MYSQL_DATABASE=blood_donation_app  # Ensure this DB is created on startup
     volumes:
       - mysql_data:/var/lib/mysql
+      - ./database/init.sql:/docker-entrypoint-initdb.d/init.sql  # Mount init.sql
+      - ./database/schema.sql:/docker-entrypoint-initdb.d/schema.sql  # Mount schema.sql
+    networks:
+      - blood-donation-network
 
 volumes:
-  mysql_data:
+  mysql_data: {}  # Persistent storage for MySQL data

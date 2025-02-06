@@ -1,24 +1,28 @@
 require('dotenv').config();
 const express = require('express');
-const mysql = require('mysql2');
+const mysql = require('mysql2'); // Use mysql2 for better compatibility with promises
 const bcrypt = require('bcryptjs');
 const app = express();
-app.use(express.json())
 
+// Use middleware to parse incoming JSON data
+app.use(express.json());
+
+// Create MySQL connection
 const connection = mysql.createConnection({
-    host: process.env.DB_HOST,
-    user: process.env.DB_USER,
-    password: process.env.DB_PASSWORD,
-    database: process.env.DB_NAME ,
-  });
-  
-  connection.connect((err) => {
+    host: process.env.DB_HOST || 'mysql',  // Use 'mysql' as the service name defined in docker-compose
+    user: process.env.DB_USER || 'root',
+    password: process.env.DB_PASSWORD || 'root',
+    database: process.env.DB_NAME || 'blood_donation_app',
+});
+
+// Connect to MySQL
+connection.connect((err) => {
     if (err) {
-      console.error('Database connection failed:', err.stack);
-      return;
+        console.error('Error connecting to MySQL:', err.stack);
+        return;
     }
-    console.log('Connected to the database.');
-  });
+    console.log('Connected to MySQL database');
+});
 
 // User registration route
 app.post('/register', async (req, res) => {
@@ -26,8 +30,11 @@ app.post('/register', async (req, res) => {
 
     if (!email || !password) return res.status(400).send('Email and password required.');
 
+    // Hash the password
     const hashedPassword = await bcrypt.hash(password, 10);
-    db.query('INSERT INTO users (email, password) VALUES (?, ?)', [email, hashedPassword], (err) => {
+
+    // Insert the user into the database
+    connection.query('INSERT INTO users (email, password) VALUES (?, ?)', [email, hashedPassword], (err) => {
         if (err) return res.status(500).send('Error registering user');
         res.send('User registered successfully!');
     });
@@ -37,12 +44,15 @@ app.post('/register', async (req, res) => {
 app.post('/login', (req, res) => {
     const { email, password } = req.body;
 
-    db.query('SELECT * FROM users WHERE email = ?', [email], async (err, results) => {
+    // Query the database to find the user by email
+    connection.query('SELECT * FROM users WHERE email = ?', [email], async (err, results) => {
         if (err) return res.status(500).send('Error logging in');
 
         if (results.length === 0) return res.status(400).send('Invalid email or password');
 
         const user = results[0];
+        
+        // Compare the password with the hashed password stored in the database
         const match = await bcrypt.compare(password, user.password);
 
         if (match) return res.json({ success: true });

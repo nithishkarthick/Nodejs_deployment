@@ -1,6 +1,3 @@
--- Create the database if it doesn't exist
-CREATE DATABASE IF NOT EXISTS blood_donation_app;
-USE blood_donation_app;
 
 -- Users table (Authentication)
 CREATE TABLE IF NOT EXISTS users (
