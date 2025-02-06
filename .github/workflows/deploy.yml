@@ -3,10 +3,7 @@ name: Node.js CI/CD with Docker
 on:
   push:
     branches:
-      - main  # Trigger deployment when pushing to the main branch
-  pull_request:
-    branches:
-      - main  # Trigger deployment when creating a pull request to the main branch    
+      - main
 
 jobs:
   build:
@@ -19,27 +16,17 @@ jobs:
     - name: Set up Node.js
       uses: actions/setup-node@v2
       with:
-        node-version: '16'  # Set the Node.js version here (use the version your app is using)
+        node-version: '16'
 
     - name: Install dependencies
       run: npm install
 
     - name: Run tests
-      run: npm test  # If you have tests set up, otherwise, remove this step
+      run: npm test
 
-    - name: Build the app
-      run: npm run build  # If you have a build script, otherwise remove this step
-
-    - name: Set up Docker Buildx
-      uses: docker/setup-buildx-action@v2
-
-    - name: Cache Docker layers
-      uses: actions/cache@v2
-      with:
-        path: /tmp/.buildx-cache
-        key: ${{ runner.os }}-buildx-${{ github.sha }}
-        restore-keys: |
-          ${{ runner.os }}-buildx-
+    - name: Build Docker image
+      run: |
+        docker build -t ${{ secrets.DOCKER_USERNAME }}/github_action:latest .
 
     - name: Log in to Docker Hub
       uses: docker/login-action@v2
@@ -47,11 +34,6 @@ jobs:
         username: ${{ secrets.DOCKER_USERNAME }}
         password: ${{ secrets.DOCKER_PASSWORD }}
 
-    - name: Build Docker image
-      run: |
-        docker build -t your-docker-username/your-image-name:latest .
-
     - name: Push Docker image to Docker Hub
       run: |
-        docker push your-docker-username/your-image-name:latest
-
+        docker push ${{ secrets.DOCKER_USERNAME }}/github_action:latest
