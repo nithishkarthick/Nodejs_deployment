@@ -51,7 +51,7 @@ jobs:
       run: |
         # Assuming you have test scripts set up
         curl http://localhost:4000/test-endpoint # Example test for user-service
-        curl http://localhost:5000/test-endpoint # Example test for donor-service
+        curl http://localhost:5001/test-endpoint # Example test for donor-service
 
     - name: Shut down containers
       run: |
