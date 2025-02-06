@@ -60,6 +60,10 @@ app.get('/donors', (req, res) => {
         res.json(result);
     });
 });
+app.get('/test-endpoint', (req, res) => {
+    res.send('Test endpoint is working!');
+});
+
 
 // Start the server
 app.listen(process.env.PORT, () => console.log(`Donor Service running on port ${process.env.PORT}`));

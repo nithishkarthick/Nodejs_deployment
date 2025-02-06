@@ -22,11 +22,3 @@ CREATE TABLE IF NOT EXISTS donors (
     location VARCHAR(255) NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
-
--- Insert sample data
-INSERT INTO users (email, password) VALUES
-('admin@example.com', '$2a$10$w3m.H/BbTPtqk7/k6ONV1O5S5eXX0hvg9e6k3xLzOWrWPaA6D2e6K'); -- Hashed password example
-
-INSERT INTO donors (name, age, gender, phone, dob, blood_group, location) VALUES
-('John Doe', 28, 'Male', '1234567890', '1996-03-15', 'O+', 'New York'),
-('Jane Smith', 32, 'Female', '0987654321', '1992-07-22', 'A-', 'Los Angeles');
