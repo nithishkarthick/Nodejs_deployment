@@ -56,10 +56,16 @@ jobs:
           sleep 5
         done
         # Wait for user-service to be ready
-        until curl --silent --fail http://localhost:4000/test-endpoint; do
-          echo "Waiting for user-service to be ready..."
-          sleep 5
+        retries=30
+         until curl --silent --fail http://localhost:4000/test-endpoint || [ $retries -eq 0 ]; do
+           echo "Waiting for user-service to be ready..."
+           sleep 5
+           retries=$((retries-1))
         done
+        if [ $retries -eq 0 ]; then
+          echo "user-service is not ready after 30 attempts, failing..."
+        exit 1
+        fi
         # Wait for donor-service to be ready
         until curl --silent --fail http://localhost:5001/test-endpoint; do
           echo "Waiting for donor-service to be ready..."
