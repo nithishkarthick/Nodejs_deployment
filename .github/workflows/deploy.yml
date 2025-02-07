@@ -39,6 +39,9 @@ jobs:
     # Build user-service Docker image
     - name: Build user-service Docker image
       run: |
+            docker-compose down
+            docker-compose up --build -d
+
         docker-compose up --build -d user-service
 
     # Build donor-service Docker image
