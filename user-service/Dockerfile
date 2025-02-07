@@ -8,15 +8,11 @@ WORKDIR /app
 COPY package.json package-lock.json ./
 RUN npm install --production
 
-# Copy wait-for-it.sh script and set permissions
-COPY wait-for-it.sh /app/wait-for-it.sh
-RUN chmod +x /app/wait-for-it.sh  # Ensure the script is executable
+# Copy the rest of the application
+COPY . .
 
 # Set the entrypoint
 ENTRYPOINT [ "mysql:3306", "--", "npm", "start"]
-
-# Copy the rest of the application
-COPY . .
 
 # Expose the service on port 4000
 EXPOSE 4000
