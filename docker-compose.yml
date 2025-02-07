@@ -78,7 +78,7 @@ services:
       DB_PASSWORD: root
       DB_NAME: blood_donation_app # Ensure this DB is created on startup
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      test: ["CMD", "mysqladmin", "ping", "-h", "mysql"]
       interval: 10s
       retries: 5
       start_period: 30s
