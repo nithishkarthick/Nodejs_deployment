@@ -12,6 +12,7 @@ services:
       - "4000:4000"
     depends_on:
       - mysql
+    entrypoint: ["./wait-for-it.sh", "mysql:3306", "--", "npm", "start"] 
     env_file:
       - ./user-service/.env
     networks:
