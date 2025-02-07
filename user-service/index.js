@@ -3,6 +3,7 @@ const express = require('express');
 const mysql = require('mysql2'); // Use mysql2 for better compatibility with promises
 const bcrypt = require('bcryptjs');
 const app = express();
+const retry = require('retry');
 
 // Use middleware to parse incoming JSON data
 app.use(express.json());
@@ -15,15 +16,20 @@ const connection = mysql.createConnection({
     database: process.env.DB_NAME || 'blood_donation_app',
 });
 
-// Connect to MySQL
-connection.connect((err) => {
-    if (err) {
-        console.error('Error connecting to MySQL:', err.stack);
-        setTimeout(connectToDatabase, 4000);
-    }
-    console.log('Connected to MySQL database');
+const operation = retry.operation({ retries: 10, factor: 2, minTimeout: 1000 });
 
-  return connection;
+operation.attempt(currentAttempt => {
+  connection.connect(err => {
+    if (err) {
+      console.log(`Attempt ${currentAttempt} failed: ${err.message}`);
+      if (operation.retry(err)) {
+        return;
+      }
+      console.log("Couldn't connect to MySQL after several attempts.");
+    } else {
+      console.log("Connected to MySQL");
+    }
+  });
 });
 
 // User registration route
