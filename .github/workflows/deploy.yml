@@ -16,9 +16,11 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v2
 
+    # Set up Docker Buildx (for multi-platform builds, optional)
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v2
 
+    # Cache Docker layers (optional, speeds up builds)
     - name: Cache Docker layers
       uses: actions/cache@v2
       with:
@@ -27,36 +29,42 @@ jobs:
         restore-keys: |
           ${{ runner.os }}-docker-
 
+    # Install Docker Compose
+    - name: Install Docker Compose
+      run: |
+        curl -L "https://github.com/docker/compose/releases/download/1.29.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+        sudo chmod +x /usr/local/bin/docker-compose
+        docker-compose --version  # Verify installation
+
+    # Build user-service Docker image
     - name: Build user-service Docker image
       run: |
         docker-compose up --build -d user-service
 
+    # Build donor-service Docker image
     - name: Build donor-service Docker image
       run: |
-        docker-compose up --build -d donor-service
+        docker build -t donor-service ./donor-service
 
+    # Build MySQL Docker image
     - name: Build MySQL Docker image
       run: |
-        docker-compose up --build -d mysql
+        docker build -t mysql-db ./database
 
-    - name: Set up Docker Compose
-      run: |
-        curl -L "https://github.com/docker/compose/releases/download/1.29.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
-        chmod +x /usr/local/bin/docker-compose
-
+    # Run containers with Docker Compose
     - name: Run containers with Docker Compose
       run: |
-        docker-compose up -d
+        docker-compose -f docker-compose.yml up -d
 
-    - name: Wait for MySQL to be ready
+    # Wait for MySQL, user-service, and donor-service to be ready
+    - name: Wait for MySQL, user-service, and donor-service to be ready
       run: |
-        until docker-compose exec mysql mysqladmin --user=root --password=root --host=mysql --port=3306 ping --silent; do
+        # Wait for MySQL container to be ready
+        until docker-compose run mysql mysqladmin --user=root --password=root --host=mysql --port=3306 ping --silent; do
           echo "Waiting for MySQL to be ready..."
           sleep 5
         done
-
-    - name: Wait for user-service to be ready
-      run: |
+        # Wait for user-service to be ready
         retries=30
         until curl --silent --fail http://localhost:4000/test-endpoint || [ $retries -eq 0 ]; do
           echo "Waiting for user-service to be ready..."
@@ -67,30 +75,31 @@ jobs:
           echo "user-service is not ready after 30 attempts, failing..."
           exit 1
         fi
-
-    - name: Wait for donor-service to be ready
-      run: |
+        # Wait for donor-service to be ready
         until curl --silent --fail http://localhost:5001/test-endpoint; do
           echo "Waiting for donor-service to be ready..."
           sleep 5
         done
 
+    # Run tests (example)
     - name: Run tests
       run: |
-        # Running the actual tests after services are confirmed to be up
         curl http://localhost:4000/test-endpoint # Example test for user-service
         curl http://localhost:5001/test-endpoint # Example test for donor-service
 
+    # Shut down containers
     - name: Shut down containers
       run: |
         docker-compose down
 
+    # Log in to Docker Hub
     - name: Log in to Docker Hub
       uses: docker/login-action@v2
       with:
         username: ${{ secrets.DOCKER_USERNAME }}
         password: ${{ secrets.DOCKER_PASSWORD }}
 
+    # Push Docker images to Docker Hub
     - name: Push Docker images to Docker Hub
       run: |
         docker push user-service
