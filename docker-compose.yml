@@ -11,7 +11,9 @@ services:
     ports:
       - "4000:4000"
     depends_on:
-      - mysql
+      - mysql 
+    command: ["sh", "-c", "until mysqladmin ping -h mysql --silent; do echo 'Waiting for MySQL...'; sleep 2; done; ./start-service.sh"]
+
     env_file:
       - ./user-service/.env
     networks:
