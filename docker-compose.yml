@@ -54,6 +54,7 @@ services:
       - blood-donation-network
 
   mysql:
+    build: ./database # Build MySQL image from Dockerfile in ./database
     container_name: mysql
     restart: always
     ports:
