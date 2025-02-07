@@ -8,11 +8,9 @@ WORKDIR /app
 COPY package.json package-lock.json ./
 RUN npm install --production
 
-# Copy wait-for-it.sh script into the container
+# Copy wait-for-it.sh script and set permissions
 COPY wait-for-it.sh /app/wait-for-it.sh
-
-# Ensure the script has execute permissions
-RUN chmod +x /app/wait-for-it.sh
+RUN chmod +x /app/wait-for-it.sh  # Ensure the script is executable
 
 # Set the entrypoint
 ENTRYPOINT ["./wait-for-it.sh", "mysql:3306", "--", "npm", "start"]
