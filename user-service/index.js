@@ -19,9 +19,11 @@ const connection = mysql.createConnection({
 connection.connect((err) => {
     if (err) {
         console.error('Error connecting to MySQL:', err.stack);
-        return;
+        setTimeout(connectToDatabase, 4000);
     }
     console.log('Connected to MySQL database');
+
+  return connection;
 });
 
 // User registration route
