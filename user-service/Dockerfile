@@ -8,6 +8,10 @@ WORKDIR /app
 COPY package.json package-lock.json ./
 RUN npm install --production
 
+# Copy wait-for-it.sh script
+COPY wait-for-it.sh /app/wait-for-it.sh
+RUN chmod +x /app/wait-for-it.sh
+
 # Copy the rest of the application
 COPY . .
 
