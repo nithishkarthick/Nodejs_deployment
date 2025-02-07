@@ -53,6 +53,18 @@ services:
     networks:
       - blood-donation-network
 
+  frontend:
+    build:
+           ./frontend  # Path to your frontend directory
+    dockerfile: Dockerfile  # Ensure you have a Dockerfile in your frontend directory
+    container_name: frontend
+    ports:
+      - "8080:80"  # Exposing the frontend on port 8080
+    volumes:
+      - ./frontend/assets:/usr/share/nginx/html/assets  # Mount assets folder into the container
+    networks:
+      - blood-donation-network
+
   mysql:
     build: ./database # Build MySQL image from Dockerfile in ./database
     container_name: mysql
