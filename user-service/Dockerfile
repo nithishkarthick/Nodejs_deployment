@@ -13,7 +13,7 @@ COPY wait-for-it.sh /app/wait-for-it.sh
 RUN chmod +x /app/wait-for-it.sh  # Ensure the script is executable
 
 # Set the entrypoint
-ENTRYPOINT ["./wait-for-it.sh", "mysql:3306", "--", "npm", "start"]
+ENTRYPOINT [ "mysql:3306", "--", "npm", "start"]
 
 # Copy the rest of the application
 COPY . .
