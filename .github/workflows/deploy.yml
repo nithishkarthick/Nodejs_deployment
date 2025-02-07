@@ -38,6 +38,7 @@ jobs:
 
     # Build user-service Docker image
     - name: Build user-service Docker image
+    
       run: |
         docker build -t user-service ./user-service
 
@@ -59,11 +60,11 @@ jobs:
     # Wait for MySQL, user-service, and donor-service to be ready
     - name: Wait for MySQL, user-service, and donor-service to be ready
       run: |
-        # Wait for MySQL container to be ready
-        until docker-compose run mysql mysqladmin --user=root --password=root --host=mysql --port=3306 ping --silent; do
-          echo "Waiting for MySQL to be ready..."
-          sleep 5
+        until mysqladmin ping -h mysql --silent; do
+           echo "Waiting for MySQL to be ready..."
+           sleep 5
         done
+
         # Wait for user-service to be ready
         retries=30
         until curl --silent --fail http://localhost:4000/test-endpoint || [ $retries -eq 0 ]; do
