@@ -8,14 +8,10 @@ services:
   user-service:
     build: ./user-service
     container_name: user-service
-  
-
     ports:
       - "4000:4000"
     depends_on:
       - mysql
-      conditions:
-      - service_healthy
     env_file:
       - ./user-service/.env
     networks:
@@ -28,8 +24,6 @@ services:
       - "5001:5001"
     depends_on:
       - mysql
-      conditions:
-      - service_healthy
     env_file:
       - ./donor-service/.env
     networks:
@@ -42,8 +36,6 @@ services:
       - "6000:6000"
     depends_on:
       - mysql
-    conditions:
-      - service_healthy  
     env_file:
       - ./notification-service/.env
     networks:
@@ -83,8 +75,12 @@ services:
       DB_USER: root
       DB_PASSWORD: root
       DB_NAME: blood_donation_app # Ensure this DB is created on startup
-      healthcheck: "mysqladmin ping -h localhost"
-
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      retries: 5
+      start_period: 30s
+      timeout: 10s
     volumes:
       - mysql_data:/var/lib/mysql
       - ./database/init.sql:/docker-entrypoint-initdb.d/init.sql  # Mount init.sql
