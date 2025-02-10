@@ -17,6 +17,12 @@ services:
       - ./user-service/.env
     networks:
       - blood-donation-network  
+    environment:
+      - DB_HOST=mysql
+      - DB_PORT=3306
+      - DB_USER=root
+      - DB_PASSWORD=root
+      - DB_NAME=blood_donation_app
 
   donor-service:
     build: ./donor-service
@@ -28,7 +34,14 @@ services:
     env_file:
       - ./donor-service/.env
     networks:
-      - blood-donation-network  
+      - blood-donation-network
+    environment:
+      - DB_HOST=mysql
+      - DB_PORT=3306
+      - DB_USER=root
+      - DB_PASSWORD=root
+      - DB_NAME=blood_donation_app
+
 
   notification-service:
     build: ./notification-service
@@ -41,6 +54,12 @@ services:
       - ./notification-service/.env
     networks:
       - blood-donation-network
+    environment:
+      - DB_HOST=mysql
+      - DB_PORT=3306
+      - DB_USER=root
+      - DB_PASSWORD=root
+      - DB_NAME=blood_donation_app  
 
   api-gateway:
     build: ./api-gateway
@@ -53,6 +72,10 @@ services:
       - notification-service
     networks:
       - blood-donation-network
+    environment:
+      - USER_SERVICE_URL=http://user-service:4000
+      - DONOR_SERVICE_URL=http://donor-service:5001
+      - NOTIFICATION_SERVICE_URL=http://notification-service:6000  
 
   frontend:
     build: ./frontend  # Path to your frontend directory
@@ -63,6 +86,8 @@ services:
       - ./frontend/assets:/usr/share/nginx/html/assets  # Mount assets folder into the container
     networks:
       - blood-donation-network
+    environment:
+      - API_GATEWAY_URL=http://api-gateway:8000  
 
   mysql:
     build: ./database # Build MySQL image from Dockerfile in ./database
