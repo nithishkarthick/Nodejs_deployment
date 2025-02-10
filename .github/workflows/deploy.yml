@@ -64,6 +64,13 @@ jobs:
            echo "Waiting for MySQL to be ready..."
            sleep 5
         done
+        env $(cat ./user-service/.env | grep -v '^#' | xargs) docker-compose -f docker-compose.yml exec user-service curl -s http://localhost:4000/test-endpoint
+        env $(cat ./donor-service/.env | grep -v '^#' | xargs) docker-compose -f docker-compose.yml exec donor-service curl -s http://localhost:5001/test-endpoint
+        env $(cat ./notification-service/.env | grep -v '^#' | xargs) docker-compose -f docker-compose.yml exec notification-service curl -s http://localhost:6000/test-endpoint
+        env $(cat ./api-gateway/.env | grep -v '^#' | xargs) docker-compose -f docker-compose.yml exec api-gateway curl -s http://localhost:8000/test-endpoint
+        env $(cat ./frontend/.env | grep -v '^#' | xargs) docker-compose -f docker-compose.yml exec frontend curl -s http://localhost:8080/test-endpoint
+        env $(cat ./frontend/.env | grep -v '^#' | xargs) docker-compose -f docker-compose.yml exec mysql curl -s http://localhost:3306/test-endpoint
+        
 
         # Wait for user-service to be ready
         retries=30
@@ -106,3 +113,9 @@ jobs:
         docker push user-service
         docker push donor-service
         docker push mysql-db
+env:
+  DB_HOST: mysql
+  DB_USER: ${{ secrets.DB_USER }}
+  DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+  DB_NAME: ${{ secrets.DB_NAME }}
+  DB_PORT: 3306
