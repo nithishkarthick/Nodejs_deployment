@@ -36,18 +36,15 @@ jobs:
         restore-keys: |
           ${{ runner.os }}-docker-
 
-    # Build user-service Docker image
+    # Build Docker images
     - name: Build user-service Docker image
-    
       run: |
         docker build -t user-service ./user-service
 
-    # Build donor-service Docker image
     - name: Build donor-service Docker image
       run: |
         docker build -t donor-service ./donor-service
 
-    # Build MySQL Docker image
     - name: Build MySQL Docker image
       run: |
         docker build -t mysql-db ./database
@@ -57,22 +54,9 @@ jobs:
       run: |
         docker-compose -f docker-compose.yml up -d
 
-    # Wait for MySQL, user-service, and donor-service to be ready
-    - name: Wait for MySQL, user-service, and donor-service to be ready
+    # Wait for MySQL and other services to be ready
+    - name: Wait for services to be ready
       run: |
-        until mysqladmin ping -h mysql --silent; do
-           echo "Waiting for MySQL to be ready..."
-           sleep 5
-        done
-        env $(cat ./user-service/.env | grep -v '^#' | xargs) docker-compose -f docker-compose.yml exec user-service curl -s http://localhost:4000/test-endpoint
-        env $(cat ./donor-service/.env | grep -v '^#' | xargs) docker-compose -f docker-compose.yml exec donor-service curl -s http://localhost:5001/test-endpoint
-        env $(cat ./notification-service/.env | grep -v '^#' | xargs) docker-compose -f docker-compose.yml exec notification-service curl -s http://localhost:6000/test-endpoint
-        env $(cat ./api-gateway/.env | grep -v '^#' | xargs) docker-compose -f docker-compose.yml exec api-gateway curl -s http://localhost:8000/test-endpoint
-        env $(cat ./frontend/.env | grep -v '^#' | xargs) docker-compose -f docker-compose.yml exec frontend curl -s http://localhost:8080/test-endpoint
-        env $(cat ./frontend/.env | grep -v '^#' | xargs) docker-compose -f docker-compose.yml exec mysql curl -s http://localhost:3306/test-endpoint
-        
-
-        # Wait for user-service to be ready
         retries=30
         until curl --silent --fail http://localhost:4000/test-endpoint || [ $retries -eq 0 ]; do
           echo "Waiting for user-service to be ready..."
@@ -83,11 +67,17 @@ jobs:
           echo "user-service is not ready after 30 attempts, failing..."
           exit 1
         fi
-        # Wait for donor-service to be ready
-        until curl --silent --fail http://localhost:5001/test-endpoint; do
+
+        retries=30
+        until curl --silent --fail http://localhost:5001/test-endpoint || [ $retries -eq 0 ]; do
           echo "Waiting for donor-service to be ready..."
           sleep 5
+          retries=$((retries-1))
         done
+        if [ $retries -eq 0 ]; then
+          echo "donor-service is not ready after 30 attempts, failing..."
+          exit 1
+        fi
 
     # Run tests
     - name: Run tests
@@ -113,6 +103,7 @@ jobs:
         docker push user-service
         docker push donor-service
         docker push mysql-db
+
 env:
   DB_HOST: mysql
   DB_USER: ${{ secrets.DB_USER }}
