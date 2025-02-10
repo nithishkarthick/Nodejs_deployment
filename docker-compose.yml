@@ -13,7 +13,6 @@ services:
     depends_on:
       - mysql 
     command: ["sh", "-c", "until mysqladmin ping -h mysql --silent; do echo 'Waiting for MySQL...'; sleep 2; done; ./start-service.sh"]
-
     env_file:
       - ./user-service/.env
     networks:
@@ -77,7 +76,7 @@ services:
       DB_USER: root
       DB_PASSWORD: root
       DB_NAME: blood_donation_app # Ensure this DB is created on startup
-     healthcheck:
+    healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-u", "root", "-p$DB_PASSWORD"]
       interval: 10s
       retries: 20
