@@ -54,8 +54,7 @@ jobs:
       run: |
         docker-compose -f docker-compose.yml up -d
 
-    # Wait for MySQL and other services to be ready
-    - name: Wait for services to be ready
+    - name: Wait for MySQL and services to be ready
       run: |
         retries=30
         until curl --silent --fail http://localhost:4000/test-endpoint || [ $retries -eq 0 ]; do
@@ -78,6 +77,12 @@ jobs:
           echo "donor-service is not ready after 30 attempts, failing..."
           exit 1
         fi
+
+    # Debug logs of user-service to check what's going wrong
+    - name: Check logs of user-service
+      run: |
+        docker-compose logs user-service
+
 
     # Run tests
     - name: Run tests
