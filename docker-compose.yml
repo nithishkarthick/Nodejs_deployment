@@ -76,7 +76,9 @@ services:
     environment:
       - USER_SERVICE_URL=http://user-service:4000
       - DONOR_SERVICE_URL=http://donor-service:5001
-      - NOTIFICATION_SERVICE_URL=http://notification-service:6000  
+      - NOTIFICATION_SERVICE_URL=http://notification-service:6000
+    env_file:
+      - ./api-gateway/.env
 
   frontend:
     build: ./frontend
@@ -88,7 +90,9 @@ services:
     networks:
       - blood-donation-network
     environment:
-      - API_GATEWAY_URL=http://api-gateway:8000  
+      - API_GATEWAY_URL=http://api-gateway:8000
+    env_file:
+      - ./frontend/.env  
 
   mysql:
     build: ./database
@@ -97,6 +101,10 @@ services:
     ports:
       - "3306:3306"
     environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: blood_donation_app
+    env_file:
+      - ./database/.env
       DB_HOST: mysql
       DB_PORT: 3306
       DB_USER: root
@@ -104,10 +112,12 @@ services:
       DB_NAME: blood_donation_app
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "mysql", "-u", "root", "-proot"]
+      disable: true
       interval: 10s
       retries: 20
       start_period: 30s
       timeout: 10s
+      restart: always
     volumes:
       - mysql_data:/var/lib/mysql
       - ./database/init.sql:/docker-entrypoint-initdb.d/init.sql
