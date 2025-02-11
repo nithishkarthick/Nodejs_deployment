@@ -3,7 +3,7 @@ const express = require('express');
 const mysql = require('mysql2');
 const path = require('path');
 
-const retry = require('async-retry');
+const retry = require('retry');
 
 // Create an instance of express
 const app = express();
@@ -14,29 +14,34 @@ app.use(express.json());
 // Serve static files (CSS, JS, etc.) from the 'frontend/public' folder
 app.use(express.static(path.join(__dirname, '..', 'frontend', 'public')));
 
-async function connectWithRetry() {
-    try {
-        await retry(async () => {
-            const connection = mysql.createConnection({
-                host: 'mysql',  // MySQL container name
-                user: process.env.DB_USER || 'root',
-                password: process.env.DB_PASSWORD || 'root',
-                database: 'blood_donation_app',
-            });
+const operation = retry.operation({
+    retries: 10, // retry up to 10 times
+    factor: 2,   // exponential backoff
+    minTimeout: 1000, // minimum time between retries (1 second)
+  });
+  
+ operation.attempt((currentAttempt) => {
+    const connection = mysql.createConnection({
+      host: process.env.DB_HOST || 'mysql', // use the name of the MySQL container or service
+      user: process.env.DB_USER || 'root',
+      password: process.env.DB_PASSWORD || 'root',
+      database: process.env.DB_NAME || 'blood_donation_app',
+    });
+  
 
-            connection.connect((err) => {
-                if (err) throw err;
-                console.log('Connected to MySQL database');
-            });
-        }, {
-            retries: 5,  // Retry 5 times
-            minTimeout: 2000,  // Wait 2 seconds between retries
-        });
-    } catch (err) {
-        console.error('Error connecting to MySQL:', err.stack);
-    }
-}
-
+connection.connect((err) => {
+        if (err) {
+          console.log(`Attempt ${currentAttempt} failed: ${err.message}`);
+          if (operation.retry(err)) {
+            return;
+          }
+          console.log("Couldn't connect to MySQL after several attempts.");
+          process.exit(1);
+        } else {
+          console.log('Connected to MySQL');
+        }
+      });
+    });
 connectWithRetry();
 // Donor registration route
 app.post('/donate', (req, res) => {
