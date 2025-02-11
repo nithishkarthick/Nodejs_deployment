@@ -31,6 +31,7 @@ services:
       - "5001:5001"
     depends_on:
       - mysql
+    command: ["sh", "-c", "until mysqladmin ping -h mysql --silent; do echo 'Waiting for MySQL...'; sleep 5; done; ./start-service.sh"]
     env_file:
       - ./donor-service/.env
     networks:
@@ -42,7 +43,6 @@ services:
       - DB_PASSWORD=root
       - DB_NAME=blood_donation_app
 
-
   notification-service:
     build: ./notification-service
     container_name: notification-service
@@ -50,6 +50,7 @@ services:
       - "6000:6000"
     depends_on:
       - mysql
+    command: ["sh", "-c", "until mysqladmin ping -h mysql --silent; do echo 'Waiting for MySQL...'; sleep 5; done; ./start-service.sh"]
     env_file:
       - ./notification-service/.env
     networks:
@@ -59,7 +60,7 @@ services:
       - DB_PORT=3306
       - DB_USER=root
       - DB_PASSWORD=root
-      - DB_NAME=blood_donation_app  
+      - DB_NAME=blood_donation_app
 
   api-gateway:
     build: ./api-gateway
@@ -102,7 +103,7 @@ services:
       DB_PASSWORD: root
       DB_NAME: blood_donation_app
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "mysql", "-u", "root", "-p$DB_PASSWORD"]
+      test: ["CMD", "mysqladmin", "ping", "-h", "mysql", "-u", "root", "-proot"]
       interval: 10s
       retries: 20
       start_period: 30s
