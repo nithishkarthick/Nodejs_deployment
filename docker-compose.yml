@@ -100,16 +100,11 @@ services:
     restart: always
     ports:
       - "3306:3306"
+    env_file:
+      - ./database/.env  
     environment:
       MYSQL_ROOT_PASSWORD: root
       MYSQL_DATABASE: blood_donation_app
-    env_file:
-      - ./database/.env
-      DB_HOST: mysql
-      DB_PORT: 3306
-      DB_USER: root
-      DB_PASSWORD: root
-      DB_NAME: blood_donation_app
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "mysql", "-u", "root", "-proot"]
       disable: true
