@@ -107,12 +107,10 @@ services:
       MYSQL_DATABASE: blood_donation_app
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "mysql", "-u", "root", "-proot"]
-      disable: true
       interval: 10s
       retries: 20
       start_period: 30s
       timeout: 10s
-      restart: always
     volumes:
       - mysql_data:/var/lib/mysql
       - ./database/init.sql:/docker-entrypoint-initdb.d/init.sql
