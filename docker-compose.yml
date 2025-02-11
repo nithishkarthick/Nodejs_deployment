@@ -11,8 +11,8 @@ services:
     ports:
       - "4000:4000"
     depends_on:
-      - mysql 
-    command: ["sh", "-c", "until mysqladmin ping -h mysql --silent; do echo 'Waiting for MySQL...'; sleep 2; done; ./start-service.sh"]
+      - mysql
+    command: ["sh", "-c", "until mysqladmin ping -h mysql --silent; do echo 'Waiting for MySQL...'; sleep 5; done; ./start-service.sh"]
     env_file:
       - ./user-service/.env
     networks:
@@ -78,41 +78,41 @@ services:
       - NOTIFICATION_SERVICE_URL=http://notification-service:6000  
 
   frontend:
-    build: ./frontend  # Path to your frontend directory
+    build: ./frontend
     container_name: frontend
     ports:
-      - "8080:80"  # Exposing the frontend on port 8080
+      - "8080:80"
     volumes:
-      - ./frontend/assets:/usr/share/nginx/html/assets  # Mount assets folder into the container
+      - ./frontend/assets:/usr/share/nginx/html/assets
     networks:
       - blood-donation-network
     environment:
       - API_GATEWAY_URL=http://api-gateway:8000  
 
   mysql:
-    build: ./database # Build MySQL image from Dockerfile in ./database
+    build: ./database
     container_name: mysql
     restart: always
     ports:
       - "3306:3306"
     environment:
-      DB_HOST: mysql      # service name of MySQL container
+      DB_HOST: mysql
       DB_PORT: 3306
       DB_USER: root
       DB_PASSWORD: root
-      DB_NAME: blood_donation_app # Ensure this DB is created on startup
+      DB_NAME: blood_donation_app
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-u", "root", "-p$DB_PASSWORD"]
+      test: ["CMD", "mysqladmin", "ping", "-h", "mysql", "-u", "root", "-p$DB_PASSWORD"]
       interval: 10s
       retries: 20
       start_period: 30s
       timeout: 10s
     volumes:
       - mysql_data:/var/lib/mysql
-      - ./database/init.sql:/docker-entrypoint-initdb.d/init.sql  # Mount init.sql
-      - ./database/schema.sql:/docker-entrypoint-initdb.d/schema.sql  # Mount schema.sql
+      - ./database/init.sql:/docker-entrypoint-initdb.d/init.sql
+      - ./database/schema.sql:/docker-entrypoint-initdb.d/schema.sql
     networks:
       - blood-donation-network
 
 volumes:
-  mysql_data: {}  # Persistent storage for MySQL data
+  mysql_data: {}
