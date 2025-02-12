@@ -39,7 +39,7 @@ function connectToDatabase() {
 connectToDatabase();
 
 app.get('/test-endpoint', (req, res) => {
-  res.send('User Service is up and running!');
+  res.status(200).json({ message: 'User Service is ready!' });
 });
 
 const PORT = process.env.PORT || 4001;
