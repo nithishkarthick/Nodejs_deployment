@@ -22,8 +22,9 @@ services:
     networks:
       - blood-donation-network
 
-   user-service:
+  user-service:
     build: ./user-service
+    container_name: user_service
     restart: always
     depends_on:
       - mysql
@@ -34,7 +35,8 @@ services:
     volumes:
       - ./user-service:/app
     command: ["sh", "-c", "sleep 15 && node index.js"]
-
+    networks:
+      - blood-donation-network
 
   notification-service:
     build: ./notification-service
