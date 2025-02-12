@@ -13,12 +13,12 @@ services:
     depends_on:
       - mysql
     env_file:
-      - ./donor-service/.env  
+      - ./donor-service/.env  # Ensure this path is correct
     environment:
-      - DB_HOST: mysql
-      - DB_USER: root
-      - DB_PASSWORD: root
-      - DB_NAME: blood_donation_db
+      - DB_HOST=mysql
+      - DB_USER=root
+      - DB_PASSWORD=root
+      - DB_NAME=blood_donation_db
     networks:
       - blood-donation-network
 
@@ -31,7 +31,7 @@ services:
     ports:
       - "4001:4001"
     env_file:
-      - ./user-service/.env
+      - ./user-service/.env  # Ensure this path is correct
     volumes:
       - ./user-service:/app
     command: ["sh", "-c", "sleep 15 && node index.js"]
@@ -47,15 +47,15 @@ services:
       - mysql
     command: ["sh", "-c", "until mysqladmin ping -h mysql --silent; do echo 'Waiting for MySQL...'; sleep 5; done; ./start-service.sh"]
     env_file:
-      - ./notification-service/.env
+      - ./notification-service/.env  # Ensure this path is correct
     networks:
       - blood-donation-network
     environment:
-      - DB_HOST: mysql
-      - DB_PORT: 3306
-      - DB_USER: root
-      - DB_PASSWORD: root
-      - DB_NAME: blood_donation_app
+      - DB_HOST=mysql
+      - DB_PORT=3306
+      - DB_USER=root
+      - DB_PASSWORD=root
+      - DB_NAME=blood_donation_app
 
   api-gateway:
     build: ./api-gateway
@@ -66,9 +66,9 @@ services:
       - user-service
       - donor-service
     env_file:
-      - ./api-gateway/.env  
+      - ./api-gateway/.env  # Ensure this path is correct
     environment:
-      - JWT_SECRET: your_jwt_secret_key
+      - JWT_SECRET=your_jwt_secret_key
     networks:
       - blood-donation-network
 
@@ -82,7 +82,7 @@ services:
     networks:
       - blood-donation-network
     env_file:
-      - ./frontend/.env  
+      - ./frontend/.env  # Ensure this path is correct
 
   mysql:
     image: mysql:latest
@@ -92,7 +92,7 @@ services:
       MYSQL_ROOT_PASSWORD: root
       MYSQL_DATABASE: blood_donation_db
     env_file:
-      - .env  
+      - .env  # Ensure this path is correct
     ports:
       - "3306:3306"
     volumes:
