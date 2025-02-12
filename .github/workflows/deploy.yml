@@ -21,7 +21,7 @@ jobs:
       run: |
         curl -L "https://github.com/docker/compose/releases/download/1.29.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
         chmod +x /usr/local/bin/docker-compose
-        docker-compose --version  # Verify the installation
+        docker-compose --version  # Verify installation
 
     # Set up Docker Buildx
     - name: Set up Docker Buildx
@@ -37,63 +37,64 @@ jobs:
           ${{ runner.os }}-docker-
 
     # Build Docker images
-    - name: Build user-service Docker image
+    - name: Build Docker images
       run: |
         docker build -t user-service ./user-service
-
-    - name: Build donor-service Docker image
-      run: |
         docker build -t donor-service ./donor-service
-
-    - name: Build MySQL Docker image
-      run: |
         docker build -t mysql-db ./database
 
     # Run containers with Docker Compose
     - name: Run containers with Docker Compose
       run: |
-        docker-compose -f docker-compose.yml up -d
+        docker-compose -f docker-compose.yml up -d --build
 
-    - name: Wait for MySQL and services to be ready
+    # Wait for MySQL and Services to be Ready
+    - name: Wait for user-service to be ready
       run: |
         retries=30
-        until curl --silent --fail http://localhost:4001/test-endpoint || [ $retries -eq 0 ]; do
+        until curl --silent --fail http://user-service:4001/test-endpoint || [ $retries -eq 0 ]; do
           echo "Waiting for user-service to be ready..."
           sleep 5
           retries=$((retries-1))
         done
         if [ $retries -eq 0 ]; then
           echo "user-service is not ready after 30 attempts, failing..."
+          docker-compose logs user-service
           exit 1
         fi
 
+    - name: Wait for donor-service to be ready
+      run: |
         retries=30
-        until curl --silent --fail http://localhost:5001/test-endpoint || [ $retries -eq 0 ]; do
+        until curl --silent --fail http://donor-service:5001/test-endpoint || [ $retries -eq 0 ]; do
           echo "Waiting for donor-service to be ready..."
           sleep 5
           retries=$((retries-1))
         done
         if [ $retries -eq 0 ]; then
           echo "donor-service is not ready after 30 attempts, failing..."
+          docker-compose logs donor-service
           exit 1
         fi
 
-    # Debug logs of user-service to check what's going wrong
+    # Debug logs if services fail
     - name: Check logs of user-service
-      run: |
-        docker-compose logs user-service
+      if: failure()
+      run: docker-compose logs user-service
 
+    - name: Check logs of donor-service
+      if: failure()
+      run: docker-compose logs donor-service
 
     # Run tests
     - name: Run tests
       run: |
-        curl http://localhost:4000/test-endpoint # Example test for user-service
-        curl http://localhost:5001/test-endpoint # Example test for donor-service
+        curl http://user-service:4001/test-endpoint # Test user-service
+        curl http://donor-service:5001/test-endpoint # Test donor-service
 
     # Shut down containers
     - name: Shut down containers
-      run: |
-        docker-compose down
+      run: docker-compose down
 
     # Log in to Docker Hub
     - name: Log in to Docker Hub
@@ -102,12 +103,16 @@ jobs:
         username: ${{ secrets.DOCKER_USERNAME }}
         password: ${{ secrets.DOCKER_PASSWORD }}
 
-    # Push Docker images to Docker Hub
+    # Tag and Push Docker images to Docker Hub
     - name: Push Docker images to Docker Hub
       run: |
-        docker push user-service
-        docker push donor-service
-        docker push mysql-db
+        docker tag user-service ${{ secrets.DOCKER_USERNAME }}/user-service:latest
+        docker tag donor-service ${{ secrets.DOCKER_USERNAME }}/donor-service:latest
+        docker tag mysql-db ${{ secrets.DOCKER_USERNAME }}/mysql-db:latest
+
+        docker push ${{ secrets.DOCKER_USERNAME }}/user-service:latest
+        docker push ${{ secrets.DOCKER_USERNAME }}/donor-service:latest
+        docker push ${{ secrets.DOCKER_USERNAME }}/mysql-db:latest
 
 env:
   DB_HOST: mysql

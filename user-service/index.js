@@ -1,39 +1,48 @@
 const express = require('express');
-const mysql = require('mysql');
+const mysql = require('mysql2');
 const dotenv = require('dotenv');
-const authRoutes = require('./auth');  // Assuming your auth routes are in the 'auth' file
 
-dotenv.config();  // Load environment variables
+dotenv.config();
 
 const app = express();
-app.use(express.json());  // For parsing application/json
+app.use(express.json());
 
-// Create a database connection using environment variables
-const connection = mysql.createConnection({
-  host: process.env.DB_HOST,  // MySQL service container name from Docker
-  user: process.env.DB_USER,
-  password: process.env.DB_PASSWORD,
-  database: process.env.DB_NAME,
-});
+const dbConfig = {
+  host: process.env.DB_HOST || 'mysql',
+  user: process.env.DB_USER || 'root',
+  password: process.env.DB_PASSWORD || 'root',
+  database: process.env.DB_NAME || 'blood_donation_db',
+};
 
-function waitForMySQL() {
-  connection.connect(function (err) {
+// 🔹 Function to wait for MySQL before proceeding
+let connection;
+function connectToDatabase() {
+  connection = mysql.createConnection(dbConfig);
+
+  connection.connect((err) => {
     if (err) {
-      console.log('Waiting for MySQL...', err.message);
-      setTimeout(waitForMySQL, 5000);  // Retry after 5 seconds
+      console.error('❌ MySQL connection failed:', err.message);
+      setTimeout(connectToDatabase, 5000); // Retry in 5 sec
     } else {
-      console.log('Database connected!');
-      // Continue with the rest of your user service logic here
+      console.log('✅ Database connected successfully!');
+    }
+  });
+
+  connection.on('error', (err) => {
+    console.error('Database error:', err);
+    if (err.code === 'PROTOCOL_CONNECTION_LOST') {
+      connectToDatabase();
     }
   });
 }
 
-waitForMySQL();  // Start waiting for MySQL connection
+connectToDatabase();
 
-// Set up routes
-app.use('/auth', authRoutes);  // Assuming your authentication routes are here
+app.get('/test-endpoint', (req, res) => {
+  res.send('User Service is up and running!');
+});
 
 const PORT = process.env.PORT || 4001;
-app.listen(PORT, () => {
-  console.log(`User Service running on port ${PORT}`);
-});
+app.listen(PORT, () => console.log(`🚀 User Service running on port ${PORT}`));
+
+module.exports = connection;
