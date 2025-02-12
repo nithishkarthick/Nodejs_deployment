@@ -15,10 +15,10 @@ services:
     env_file:
       - ./donor-service/.env  
     environment:
-      - DB_HOST=mysql
-      - DB_USER=root
-      - DB_PASSWORD=root
-      - DB_NAME=blood_donation_db
+      - DB_HOST: mysql
+      - DB_USER: root
+      - DB_PASSWORD: root
+      - DB_NAME: blood_donation_db
     networks:
       - blood-donation-network
 
@@ -29,7 +29,7 @@ services:
     depends_on:
       - mysql
     ports:
-      - "4000:4000"
+      - "4001:4001"
     env_file:
       - ./user-service/.env
     volumes:
@@ -51,11 +51,11 @@ services:
     networks:
       - blood-donation-network
     environment:
-      - DB_HOST=mysql
-      - DB_PORT=3306
-      - DB_USER=root
-      - DB_PASSWORD=root
-      - DB_NAME=blood_donation_app
+      - DB_HOST: mysql
+      - DB_PORT: 3306
+      - DB_USER: root
+      - DB_PASSWORD: root
+      - DB_NAME: blood_donation_app
 
   api-gateway:
     build: ./api-gateway
@@ -68,7 +68,7 @@ services:
     env_file:
       - ./api-gateway/.env  
     environment:
-      - JWT_SECRET=your_jwt_secret_key
+      - JWT_SECRET: your_jwt_secret_key
     networks:
       - blood-donation-network
 
