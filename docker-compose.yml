@@ -17,7 +17,7 @@ services:
       - DB_USER=root
       - DB_PASSWORD=root
       - DB_NAME=blood_donation_db
-      
+
   user-service:
     build: ./user-service
     ports:
@@ -49,7 +49,7 @@ services:
       - DB_PASSWORD=root
       - DB_NAME=blood_donation_app
 
-   api-gateway:
+  api-gateway:
     build: ./api-gateway
     ports:
       - "3000:3000"
@@ -59,14 +59,13 @@ services:
     environment:
       - JWT_SECRET=your_jwt_secret_key
 
- frontend:
+  frontend:
     build: ./frontend
     container_name: frontend
     ports:
       - "8080:80"
     depends_on:
       - api-gateway
-
 
   mysql:
     image: mysql:latest
