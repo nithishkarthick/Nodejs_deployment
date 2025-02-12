@@ -17,11 +17,14 @@ services:
       - DB_USER=root
       - DB_PASSWORD=root
       - DB_NAME=blood_donation_db
+    networks:
+      - blood-donation-network
 
   user-service:
     build: ./user-service
+    container_name: user_service
     ports:
-      - "5002:5002"
+      - "4001:4001"
     depends_on:
       - mysql
     environment:
@@ -29,6 +32,11 @@ services:
       - DB_USER=root
       - DB_PASSWORD=root
       - DB_NAME=blood_donation_db
+      - JWT_SECRET=your_jwt_secret_key
+    networks:
+      - blood-donation-network
+    env_file:
+      - .env  # Use .env file for environment variables
 
   notification-service:
     build: ./notification-service
@@ -51,6 +59,7 @@ services:
 
   api-gateway:
     build: ./api-gateway
+    container_name: api-gateway
     ports:
       - "3000:3000"
     depends_on:
@@ -58,6 +67,8 @@ services:
       - donor-service
     environment:
       - JWT_SECRET=your_jwt_secret_key
+    networks:
+      - blood-donation-network
 
   frontend:
     build: ./frontend
@@ -66,6 +77,8 @@ services:
       - "8080:80"
     depends_on:
       - api-gateway
+    networks:
+      - blood-donation-network
 
   mysql:
     image: mysql:latest
@@ -79,6 +92,8 @@ services:
     volumes:
       - mysql_data:/var/lib/mysql
       - ./database/schema.sql:/docker-entrypoint-initdb.d/schema.sql
+    networks:
+      - blood-donation-network
 
 volumes:
   mysql_data: {}

@@ -57,7 +57,7 @@ jobs:
     - name: Wait for MySQL and services to be ready
       run: |
         retries=30
-        until curl --silent --fail http://localhost:4000/test-endpoint || [ $retries -eq 0 ]; do
+        until curl --silent --fail http://localhost:4001/test-endpoint || [ $retries -eq 0 ]; do
           echo "Waiting for user-service to be ready..."
           sleep 5
           retries=$((retries-1))
