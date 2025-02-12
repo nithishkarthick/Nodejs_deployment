@@ -1,16 +1,13 @@
-# Use official Nginx image from Docker Hub
-FROM nginx:alpine
+# Use official Nginx image
+FROM nginx:latest
 
-# Copy your frontend files to the appropriate directory in the Nginx container
-COPY ./assets /usr/share/nginx/html/assets
-COPY ./donor-list.html /usr/share/nginx/html/donor-list.html
-COPY ./home.html /usr/share/nginx/html/home.html
-COPY ./index.html /usr/share/nginx/html/index.html
-COPY ./login.html /usr/share/nginx/html/login.html
-COPY ./signup.html /usr/share/nginx/html/signup.html
+# Copy Nginx configuration
+COPY nginx.conf /etc/nginx/nginx.conf
 
-# Expose port 80 to access the web server
+# Copy frontend files to Nginx's HTML directory
+COPY . /usr/share/nginx/html
+
+# Expose port 80
 EXPOSE 80
 
-# Nginx will automatically start and serve the files from /usr/share/nginx/html
 CMD ["nginx", "-g", "daemon off;"]

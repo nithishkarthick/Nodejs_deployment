@@ -5,43 +5,30 @@ networks:
     driver: bridge
 
 services:
-  user-service:
-    build: ./user-service
-    container_name: user-service
-    ports:
-      - "4000:4000"
-    depends_on:
-      - mysql
-    command: ["sh", "-c", "until mysqladmin ping -h mysql --silent; do echo 'Waiting for MySQL...'; sleep 10; done; ./start-service.sh"]
-    env_file:
-      - ./user-service/.env
-    networks:
-      - blood-donation-network
-    environment:
-      - DB_HOST=mysql
-      - DB_PORT=3306
-      - DB_USER=root
-      - DB_PASSWORD=root
-      - DB_NAME=blood_donation_app
-
   donor-service:
     build: ./donor-service
-    container_name: donor-service
+    container_name: donor_service
     ports:
       - "5001:5001"
     depends_on:
       - mysql
-    command: ["sh", "-c", "until mysqladmin ping -h mysql --silent; do echo 'Waiting for MySQL...'; sleep 5; done; ./start-service.sh"]
-    env_file:
-      - ./donor-service/.env
-    networks:
-      - blood-donation-network
     environment:
       - DB_HOST=mysql
-      - DB_PORT=3306
       - DB_USER=root
       - DB_PASSWORD=root
-      - DB_NAME=blood_donation_app
+      - DB_NAME=blood_donation_db
+      
+  user-service:
+    build: ./user-service
+    ports:
+      - "5002:5002"
+    depends_on:
+      - mysql
+    environment:
+      - DB_HOST=mysql
+      - DB_USER=root
+      - DB_PASSWORD=root
+      - DB_NAME=blood_donation_db
 
   notification-service:
     build: ./notification-service
@@ -62,61 +49,37 @@ services:
       - DB_PASSWORD=root
       - DB_NAME=blood_donation_app
 
-  api-gateway:
+   api-gateway:
     build: ./api-gateway
-    container_name: api-gateway
     ports:
-      - "8000:8000"
+      - "3000:3000"
     depends_on:
       - user-service
       - donor-service
-      - notification-service
-    networks:
-      - blood-donation-network
     environment:
-      - USER_SERVICE_URL=http://user-service:4000
-      - DONOR_SERVICE_URL=http://donor-service:5001
-      - NOTIFICATION_SERVICE_URL=http://notification-service:6000
-    env_file:
-      - ./api-gateway/.env
+      - JWT_SECRET=your_jwt_secret_key
 
-  frontend:
+ frontend:
     build: ./frontend
     container_name: frontend
     ports:
       - "8080:80"
-    volumes:
-      - ./frontend/assets:/usr/share/nginx/html/assets
-    networks:
-      - blood-donation-network
-    environment:
-      - API_GATEWAY_URL=http://api-gateway:8000
-    env_file:
-      - ./frontend/.env  
+    depends_on:
+      - api-gateway
+
 
   mysql:
-    build: ./database
-    container_name: mysql
+    image: mysql:latest
+    container_name: mysql_db
     restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: blood_donation_db
     ports:
       - "3306:3306"
-    env_file:
-      - ./database/.env  # Make sure this file exists and is correctly formatted
-    environment:
-      MYSQL_ROOT_PASSWORD: root  # Correct environment variable for MySQL root password
-      MYSQL_DATABASE: blood_donation_app
-    healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "mysql", "-u", "root", "-proot"]
-      interval: 10s
-      retries: 20
-      start_period: 30s
-      timeout: 10s
     volumes:
       - mysql_data:/var/lib/mysql
-      - ./database/init.sql:/docker-entrypoint-initdb.d/init.sql
       - ./database/schema.sql:/docker-entrypoint-initdb.d/schema.sql
-    networks:
-      - blood-donation-network
 
 volumes:
   mysql_data: {}

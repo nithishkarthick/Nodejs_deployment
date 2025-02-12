@@ -1,3 +1,14 @@
-require('dotenv').config(); // This will load variables from .env into process.env
-const apiKey = process.env.API_KEY;
-const dbHost = process.env.DB_HOST;
+const express = require('express');
+const cors = require('cors');
+const routes = require('./routes');
+require('dotenv').config();
+
+const app = express();
+app.use(express.json());
+app.use(cors());
+
+// Use API Routes
+app.use('/', routes);
+
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => console.log(`API Gateway running on port ${PORT}`));

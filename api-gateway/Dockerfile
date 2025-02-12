@@ -1,12 +1,7 @@
-FROM node:18-alpine
-
+FROM node:18
 WORKDIR /app
-
 COPY package.json package-lock.json ./
-RUN npm install --production
-
+RUN npm install
 COPY . .
-
-EXPOSE 8000
-
-CMD ["node", "gateway.config.js"]
+EXPOSE 3000
+CMD ["node", "index.js"]

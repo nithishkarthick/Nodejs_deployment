@@ -1,12 +1,7 @@
-FROM node:18-alpine
-
+FROM node:18
 WORKDIR /app
-
 COPY package.json package-lock.json ./
-RUN npm install --production
-
+RUN npm install
 COPY . .
-
-EXPOSE 5000
-
+EXPOSE 5001
 CMD ["node", "index.js"]
