@@ -21,7 +21,6 @@ services:
       - DB_NAME=blood_donation_db
     networks:
       - blood-donation-network
-
   user-service:
     build: ./user-service
     container_name: user_service
@@ -31,12 +30,13 @@ services:
     ports:
       - "4001:4001"
     env_file:
-      - ./user-service/.env  # Ensure this path is correct
+      - ./user-service/.env
     volumes:
       - ./user-service:/app
-    command: ["sh", "-c", "sleep 15 && node index.js"]
+    command: ["sh", "-c", "until mysql -h mysql -u root -proot -e 'SELECT 1'; do echo 'Waiting for MySQL...'; sleep 5; done; node index.js"]
     networks:
       - blood-donation-network
+
 
   notification-service:
     build: ./notification-service
