@@ -13,7 +13,7 @@ services:
     depends_on:
       - mysql
     env_file:
-      - ./donor-service/.env  # Ensure this path is correct
+      - ./donor-service/.env
     environment:
       - DB_HOST=mysql
       - DB_USER=root
@@ -21,6 +21,7 @@ services:
       - DB_NAME=blood_donation_db
     networks:
       - blood-donation-network
+
   user-service:
     build: ./user-service
     container_name: user_service
@@ -37,7 +38,6 @@ services:
     networks:
       - blood-donation-network
 
-
   notification-service:
     build: ./notification-service
     container_name: notification-service
@@ -45,7 +45,8 @@ services:
       - "6000:6000"
     depends_on:
       - mysql
-    command: ["sh", "-c", "until mysqladmin ping -h mysql --silent; do echo 'Waiting for MySQL...'; sleep 5; done; ./start-service.sh"]
+    # Replaced mysqladmin with mysql command here.
+    command: ["sh", "-c", "until mysql -h mysql -u root -proot -e 'SELECT 1'; do echo 'Waiting for MySQL...'; sleep 5; done; ./start-service.sh"]
     env_file:
       - ./notification-service/.env  # Ensure this path is correct
     networks:
@@ -71,7 +72,6 @@ services:
       - JWT_SECRET=your_jwt_secret_key
     networks:
       - blood-donation-network
-
   frontend:
     build: ./frontend
     container_name: frontend
@@ -83,6 +83,8 @@ services:
       - blood-donation-network
     env_file:
       - ./frontend/.env  # Ensure this path is correct
+    volumes:
+      - ./frontend:/app # Ensure this path is correct
 
   mysql:
     image: mysql:latest
