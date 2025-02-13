@@ -10,6 +10,7 @@ services:
     container_name: donor_service
     ports:
       - "5001:5001"
+    entrypoint: ["./wait-for-it.sh", "mysql:3306", "--", "npm", "start"]  
     depends_on:
       - mysql
     env_file:
@@ -26,6 +27,7 @@ services:
     build: ./user-service
     container_name: user_service
     restart: always
+    entrypoint: ["./wait-for-it.sh", "mysql_db:3306", "--", "npm", "start"]
     depends_on:
       - mysql
     ports:
