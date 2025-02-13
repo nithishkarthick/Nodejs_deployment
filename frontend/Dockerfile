@@ -5,13 +5,13 @@ FROM node:18-alpine AS build
 WORKDIR /app
 
 # Copy package.json and package-lock.json first to leverage Docker's cache
-COPY ./frontend/package.json ./frontend/package-lock.json ./
+COPY package.json package-lock.json ./
 
 # Install dependencies
 RUN npm install
 
 # Copy the rest of the frontend source code
-COPY ./frontend /app
+COPY /app
 
 # Build the app (assuming you're using a command like 'npm run build')
 RUN npm run build
