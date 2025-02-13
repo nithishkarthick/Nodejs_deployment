@@ -11,7 +11,7 @@ COPY package.json package-lock.json ./
 RUN npm install
 
 # Copy the rest of the frontend source code
-COPY /app
+COPY . /app
 
 # Build the app (assuming you're using a command like 'npm run build')
 RUN npm run build
