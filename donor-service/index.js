@@ -1,6 +1,6 @@
 const express = require('express');
 const path = require('path');
-const db = require('./db'); // MySQL Connection
+const db = require('./db.js'); // MySQL Connection
 require('dotenv').config();
 
 const app = express();
