@@ -47,6 +47,7 @@ services:
       - "6000:6000"
     depends_on:
       - mysql
+    entrypoint: ["./wait-for-it.sh", "mysql_db:3306", "--", "npm", "start"]  
     # Replaced mysqladmin with mysql command here.
     command: ["sh", "-c", "until mysql -h mysql -u root -proot -e 'SELECT 1'; do echo 'Waiting for MySQL...'; sleep 5; done; ./start-service.sh"]
     env_file:
@@ -78,7 +79,7 @@ services:
     build: ./frontend
     container_name: frontend
     ports:
-      - "8080:80"
+      - "80:80"
     depends_on:
       - api-gateway
     networks:
