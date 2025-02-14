@@ -1,20 +1,25 @@
-# Step 1: Build the frontend app using Node.js
 FROM node:18-alpine AS build
 
-# Set the working directory
+# Set the working directory inside the container
 WORKDIR /app
 
-# Copy package.json and package-lock.json first to leverage Docker's cache
+# Copy package.json and package-lock.json first to take advantage of Docker cache
 COPY package.json package-lock.json ./
 
 # Install dependencies
 RUN npm install
 
-# Copy the rest of the frontend source code
-COPY . /app
+# Ensure proper permissions
+RUN chown -R node:node /app
 
-# Build the app (assuming you're using a command like 'npm run build')
-RUN npm run build
+# Copy the rest of the application code into the container
+COPY . .
+
+# Set permissions on node_modules (in case of permission issues)
+RUN chmod -R 777 /app/node_modules
+
+# Build the app using npx to avoid permission issues
+RUN npx react-scripts build
 
 # Step 2: Serve the built app using NGINX
 FROM nginx:latest
