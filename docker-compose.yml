@@ -10,7 +10,7 @@ services:
     container_name: donor_service
     ports:
       - "5001:5001"
-    entrypoint: ["./wait-for-it.sh", "mysql:3306", "--", "npm", "start"]  
+    entrypoint: ["/usr/local/bin/wait-for-it.sh", "mysql:3306", "--", "npm", "start"]
     depends_on:
       - mysql
     env_file:
@@ -21,7 +21,7 @@ services:
       - DB_PASSWORD=root
       - DB_NAME=blood_donation_db
     volumes:
-      - ./wait-for-it.sh:/usr/local/bin/wait-for-it.sh  # Corrected this line
+      - ./wait-for-it.sh:/usr/local/bin/wait-for-it.sh  # Correct path here
     networks:
       - blood-donation-network
 
@@ -29,7 +29,7 @@ services:
     build: ./user-service
     container_name: user_service
     restart: always
-    entrypoint: ["./wait-for-it.sh", "mysql_db:3306", "--", "npm", "start"]
+    entrypoint: ["/usr/local/bin/wait-for-it.sh", "mysql_db:3306", "--", "npm", "start"]
     depends_on:
       - mysql
     ports:
@@ -37,7 +37,7 @@ services:
     env_file:
       - ./user-service/.env
     volumes:
-      - ./wait-for-it.sh:/usr/local/bin/wait-for-it.sh  # Corrected this line
+      - ./wait-for-it.sh:/usr/local/bin/wait-for-it.sh  # Correct path here
     command: ["sh", "-c", "until mysql -h mysql -u root -proot -e 'SELECT 1'; do echo 'Waiting for MySQL...'; sleep 5; done; node index.js"]
     networks:
       - blood-donation-network
@@ -49,7 +49,7 @@ services:
       - "6000:6000"
     depends_on:
       - mysql
-    entrypoint: ["./wait-for-it.sh", "mysql_db:3306", "--", "npm", "start"]  
+    entrypoint: ["/usr/local/bin/wait-for-it.sh", "mysql_db:3306", "--", "npm", "start"]
     command: ["sh", "-c", "until mysql -h mysql -u root -proot -e 'SELECT 1'; do echo 'Waiting for MySQL...'; sleep 5; done; ./start-service.sh"]
     env_file:
       - ./notification-service/.env

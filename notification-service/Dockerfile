@@ -10,6 +10,12 @@ RUN apk update && apk add --no-cache mysql-client
 # Copy package.json and package-lock.json
 COPY package.json package-lock.json ./
 
+# Copy the wait-for-it.sh script into the container
+COPY wait-for-it.sh /usr/local/bin/wait-for-it.sh
+
+# Make sure the script is executable
+RUN chmod +x /usr/local/bin/wait-for-it.sh
+
 # Install dependencies
 RUN npm install --production
 
