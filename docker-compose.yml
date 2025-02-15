@@ -22,6 +22,7 @@ services:
       - DB_NAME=blood_donation_db
     volumes:
       - ./wait-for-it.sh:/usr/local/bin/wait-for-it.sh  # Correct path here
+    command: ["sh", "-c", "chmod +x /usr/local/bin/wait-for-it.sh && /usr/local/bin/wait-for-it.sh ...", "until mysql -h mysql -u root -proot -e 'SELECT 1'; do echo 'Waiting for MySQL...'; sleep 5; done; ./start-service.sh", "node", "index.js"]
     networks:
       - blood-donation-network
 
@@ -38,7 +39,7 @@ services:
       - ./user-service/.env
     volumes:
       - ./wait-for-it.sh:/usr/local/bin/wait-for-it.sh  # Correct path here
-    command: ["sh", "-c", "chmod +x /usr/local/bin/wait-for-it.sh && /usr/local/bin/wait-for-it.sh ...", "until mysql -h mysql -u root -proot -e 'SELECT 1'; do echo 'Waiting for MySQL...'; sleep 5; done; node index.js"]
+    command: ["sh", "-c", "chmod +x /usr/local/bin/wait-for-it.sh && /usr/local/bin/wait-for-it.sh ...", "until mysql -h mysql -u root -proot -e 'SELECT 1'; do echo 'Waiting for MySQL...'; sleep 5; done; ./start-service.sh", "node", "index.js"]
     networks:
       - blood-donation-network
 

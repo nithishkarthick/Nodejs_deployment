@@ -4,6 +4,11 @@ FROM node:18-alpine
 # Set the working directory inside the container
 WORKDIR /app
 
+# Install mysql-client using apk
+RUN apk update && apk add --no-cache mysql-client
+
+RUN apk add --no-cache bash
+
 # Copy package.json and package-lock.json first to take advantage of Docker cache
 COPY package.json package-lock.json ./
 
@@ -25,4 +30,4 @@ COPY . .
 EXPOSE 4001
 
 # Start the application using the wait-for-it script
-CMD ["wait-for-it.sh", "mysql:3306", "--", "node", "index.js"]
+CMD ["sh", "-c", "chmod +x /usr/local/bin/wait-for-it.sh && /usr/local/bin/wait-for-it.sh ...", "until mysql ping -h mysql --silent; do echo 'Waiting for MySQL...'; sleep 5; done; ./start-service.sh", "mysql:3306", "--", "node", "index.js"]
