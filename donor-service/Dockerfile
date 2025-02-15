@@ -31,4 +31,4 @@ COPY . .
 EXPOSE 5001
 
 # Start the application using the wait-for-it script
-CMD ["sh", "-c", "chmod +x /usr/local/bin/wait-for-it.sh && /usr/local/bin/wait-for-it.sh ...", "until mysql ping -h mysql --silent; do echo 'Waiting for MySQL...'; sleep 5; done; ./start-service.sh", "mysql:3306", "--", "node", "index.js"]
+CMD ["sh", "-c","until mysql ping -h mysql --silent; do echo 'Waiting for MySQL...'; sleep 5; done; ./start-service.sh", "mysql:3306", "--", "node", "index.js"]
