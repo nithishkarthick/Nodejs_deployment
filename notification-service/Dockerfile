@@ -7,6 +7,9 @@ WORKDIR /app
 # Install mysql-client using apk
 RUN apk update && apk add --no-cache mysql-client
 
+RUN apk add --no-cache bash
+
+
 # Copy package.json and package-lock.json
 COPY package.json package-lock.json ./
 
@@ -26,4 +29,4 @@ COPY . .
 EXPOSE 6000
 
 # Command to run your application
-CMD ["sh", "-c", "until mysql ping -h mysql --silent; do echo 'Waiting for MySQL...'; sleep 5; done; ./start-service.sh"]
+CMD ["sh", "-c", "chmod +x /usr/local/bin/wait-for-it.sh && /usr/local/bin/wait-for-it.sh ..." "until mysql ping -h mysql --silent; do echo 'Waiting for MySQL...'; sleep 5; done; ./start-service.sh"]
