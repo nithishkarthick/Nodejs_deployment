@@ -38,7 +38,7 @@ services:
       - ./user-service/.env
     volumes:
       - ./wait-for-it.sh:/usr/local/bin/wait-for-it.sh  # Correct path here
-    command: ["sh", "-c", "chmod +x /usr/local/bin/wait-for-it.sh && /usr/local/bin/wait-for-it.sh ..." "until mysql -h mysql -u root -proot -e 'SELECT 1'; do echo 'Waiting for MySQL...'; sleep 5; done; node index.js"]
+    command: ["sh", "-c", "chmod +x /usr/local/bin/wait-for-it.sh && /usr/local/bin/wait-for-it.sh ...", "until mysql -h mysql -u root -proot -e 'SELECT 1'; do echo 'Waiting for MySQL...'; sleep 5; done; node index.js"]
     networks:
       - blood-donation-network
 
@@ -50,7 +50,7 @@ services:
     depends_on:
       - mysql
     entrypoint: ["/usr/local/bin/wait-for-it.sh", "mysql:3306", "--", "npm", "start"]
-    command: ["sh", "-c", "chmod +x /usr/local/bin/wait-for-it.sh && /usr/local/bin/wait-for-it.sh ..." "until mysql -h mysql -u root -proot -e 'SELECT 1'; do echo 'Waiting for MySQL...'; sleep 5; done; ./start-service.sh"]
+    command: ["sh", "-c", "chmod +x /usr/local/bin/wait-for-it.sh && /usr/local/bin/wait-for-it.sh ...", "until mysql -h mysql -u root -proot -e 'SELECT 1'; do echo 'Waiting for MySQL...'; sleep 5; done; ./start-service.sh"]
     env_file:
       - ./notification-service/.env
     networks:

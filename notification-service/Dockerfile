@@ -29,4 +29,4 @@ COPY . .
 EXPOSE 6000
 
 # Command to run your application
-CMD ["sh", "-c", "chmod +x /usr/local/bin/wait-for-it.sh && /usr/local/bin/wait-for-it.sh ..." "until mysql ping -h mysql --silent; do echo 'Waiting for MySQL...'; sleep 5; done; ./start-service.sh"]
+CMD ["sh", "-c", "chmod +x /usr/local/bin/wait-for-it.sh && /usr/local/bin/wait-for-it.sh ...", "until mysql ping -h mysql --silent; do echo 'Waiting for MySQL...'; sleep 5; done; ./start-service.sh"]
